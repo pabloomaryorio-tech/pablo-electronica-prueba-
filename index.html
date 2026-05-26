@@ -356,56 +356,67 @@
         // =================================================================
         // 3. LÓGICA DE LA TIENDA
         // =================================================================
-        const renderizarProductos = (productosParaMostrar) => {
-            const productosSeccion = document.getElementById('productos-seccion');
-            
-            const contenedoresAnteriores = productosSeccion.querySelectorAll('div:not([style*="margin-bottom"])');
-            contenedoresAnteriores.forEach(c => c.remove());
+       const renderizarProductos = (productosParaMostrar) => {
+    const productosSeccion = document.getElementById('productos-seccion');
 
-            if (productosParaMostrar.length === 0) {
-                const emptyMsg = document.createElement('p');
-                emptyMsg.style.textAlign = 'center';
-                emptyMsg.innerText = "NO SE ENCONTRARON PRODUCTOS.";
-                productosSeccion.appendChild(emptyMsg);
-                return;
-            }
+    const contenedoresAnteriores = productosSeccion.querySelectorAll('div:not([style*="margin-bottom"])');
+    contenedoresAnteriores.forEach(c => c.remove());
 
-            const categoriasProductos = productosParaMostrar.reduce((acc, producto) => {
-                const categoriaNombre = producto.categoria || 'SIN CATEGORÍA';
-                if (!acc[categoriaNombre]) acc[categoriaNombre] = [];
-                acc[categoriaNombre].push(producto);
-                return acc;
-            }, {});
+    if (productosParaMostrar.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.innerText = "NO SE ENCONTRARON PRODUCTOS.";
+        productosSeccion.appendChild(emptyMsg);
+        return;
+    }
 
-            const categoriasOrdenadas = Object.keys(categoriasProductos).sort();
+    const novedades = productosParaMostrar.filter(p => p.novedad);
+    const resto = productosParaMostrar.filter(p => !p.novedad);
 
-            categoriasOrdenadas.forEach(categoria => {
-                const divCategoria = document.createElement('div');
-                divCategoria.innerHTML = `<h3 class="categoria-titulo">${categoria}</h3><div class="contenedor-productos"></div>`;
-                const contenedor = divCategoria.querySelector('.contenedor-productos');
-                
-                // ORDEN ALFABÉTICO AUTOMÁTICO
-                categoriasProductos[categoria].sort((a, b) => a.nombre.localeCompare(b.nombre));
+    const categoriasProductos = resto.reduce((acc, producto) => {
+        const categoriaNombre = producto.categoria || 'SIN CATEGORÍA';
+        if (!acc[categoriaNombre]) acc[categoriaNombre] = [];
+        acc[categoriaNombre].push(producto);
+        return acc;
+    }, {});
 
-                categoriasProductos[categoria].forEach(producto => {
-                    const esAgotado = producto.suspendido === true;
-                    const card = document.createElement('div');
-                    card.className = `producto-card ${esAgotado ? 'producto-sin-stock' : ''}`;
-                    
-                    card.innerHTML = `
-                        ${esAgotado ? '<div class="cartel-agotado">SIN STOCK</div>' : ''}
-                        <img src="${producto.foto}" alt="${producto.nombre}" onerror="this.onerror=null; this.src='https://placehold.co/300x300?text=Sin+Imagen';">
-                        <h4>${producto.nombre}</h4>
-                        <p class="precio">$${producto.precio.toFixed(2)}</p>
-                        <button onclick="agregarAlCarrito(${producto.id})" ${esAgotado ? 'disabled' : ''}>
-                            ${esAgotado ? 'AGOTADO' : 'AGREGAR AL CARRITO'}
-                        </button>
-                    `;
-                    contenedor.appendChild(card);
-                });
-                productosSeccion.appendChild(divCategoria);
-            });
-        };
+    if (novedades.length > 0) {
+        categoriasProductos["⭐ NOVEDADES"] = novedades;
+    }
+
+    const categoriasOrdenadas = Object.keys(categoriasProductos).sort((a, b) => {
+        if (a === "⭐ NOVEDADES") return -1;
+        if (b === "⭐ NOVEDADES") return 1;
+        return a.localeCompare(b);
+    });
+
+    categoriasOrdenadas.forEach(categoria => {
+        const divCategoria = document.createElement('div');
+        divCategoria.innerHTML = `<h3 class="categoria-titulo">${categoria}</h3><div class="contenedor-productos"></div>`;
+        const contenedor = divCategoria.querySelector('.contenedor-productos');
+
+        categoriasProductos[categoria].sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+        categoriasProductos[categoria].forEach(producto => {
+            const esAgotado = producto.suspendido === true;
+            const card = document.createElement('div');
+            card.className = `producto-card ${esAgotado ? 'producto-sin-stock' : ''}`;
+
+            card.innerHTML = `
+                ${esAgotado ? '<div class="cartel-agotado">SIN STOCK</div>' : ''}
+                <img src="${producto.foto}" alt="${producto.nombre}" onerror="this.onerror=null; this.src='https://placehold.co/300x300?text=Sin+Imagen';">
+                <h4>${producto.nombre}</h4>
+                <p class="precio">$${producto.precio.toFixed(2)}</p>
+                <button onclick="agregarAlCarrito(${producto.id})" ${esAgotado ? 'disabled' : ''}>
+                    ${esAgotado ? 'AGOTADO' : 'AGREGAR AL CARRITO'}
+                </button>
+            `;
+            contenedor.appendChild(card);
+        });
+
+        productosSeccion.appendChild(divCategoria);
+    });
+};
 
       const filtrarProductos = (categoria) => {
     let productosMostrar;
