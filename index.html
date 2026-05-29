@@ -380,8 +380,8 @@
         return acc;
     }, {});
 
-    if (novedades.length > 0) {
-        categoriasProductos["⭐ NUEVOS INGRESOS"] = novedades;
+    if (NUEVOS INGRESOS.length > 0) {
+        categoriasProductos["⭐ NUEVOS INGRESOS"] = INGRESOS;
     }
 
     const categoriasOrdenadas = Object.keys(categoriasProductos).sort((a, b) => {
@@ -422,10 +422,10 @@
     let productosMostrar;
 
     if (categoria === 'TODOS') {
-        const novedades = productos.filter(p => p.novedad);
+        const NUEVOS = productos.filter(p => p.novedad);
         const resto = productos.filter(p => !p.novedad);
 
-        productosMostrar = [...novedades, ...resto];
+        productosMostrar = [...NUEVOS INGRESOS, ...resto];
     } else {
         productosMostrar = productos.filter(p => p.categoria === categoria);
     }
